@@ -80,16 +80,32 @@ namespace BeamNG.RemoteControlUltra.Managers
                 {
                     float val = sensorValue[1];
 
-                    if (val < -0.25)
-                    {
-                        Screen.orientation = ScreenOrientation.LandscapeLeft;
-                        orientationhandler = 1;
-                    }
-                    else if (val > 0.25)
-                    {
-                        Screen.orientation = ScreenOrientation.LandscapeRight;
-                        orientationhandler = -1;
-                    }
+                    #if PLATFORM_ANDROID && !UNITY_EDITOR  
+                    if (plugin != null)  
+                    {  
+                        // 检查系统自动旋转设置  
+                        using (AndroidJavaClass settingsSystem = new AndroidJavaClass("android.provider.Settings$System"))  
+                        using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))  
+                        using (AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))  
+                        using (AndroidJavaObject contentResolver = currentActivity.Call<AndroidJavaObject>("getContentResolver"))  
+                        {  
+                            int autoRotate = settingsSystem.CallStatic<int>("getInt", contentResolver, "accelerometer_rotation", 0);  
+                            
+                            if (autoRotate == 1) // 只有在系统启用自动旋转时才执行  
+                            {  
+                                float[]? sensorValue = plugin.Call<float[]>("getSensorValues", "rotationvector");  
+                                if (sensorValue != null && sensorValue.Length >= 2)  
+                                {  
+                                    float val = sensorValue[1];  
+                                    if (val < -0.25)  
+                                        Screen.orientation = ScreenOrientation.LandscapeLeft;  
+                                    else if (val > 0.25)  
+                                        Screen.orientation = ScreenOrientation.LandscapeRight;  
+                                }  
+                            }  
+                        }  
+                    }  
+                    #endif
                 }
 
                 sensorValue = plugin.Call<float[]>("getSensorValues", "accelerometer");

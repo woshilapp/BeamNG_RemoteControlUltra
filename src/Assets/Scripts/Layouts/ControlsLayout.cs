@@ -14,7 +14,7 @@ namespace BeamNG.RemoteControlUltra.Layouts
         public const int MaxNumbButtons = 15;
         public const int MaxNumbAxes = 14; // 15 - Accelometer
 
-        public const int MaxSlotsPerControlType = 15;
+        public const int MaxSlotsPerControlType = 31;
 
         public static ControlsLayout Default => new ControlsLayout();
 
