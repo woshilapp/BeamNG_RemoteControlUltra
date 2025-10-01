@@ -1,7 +1,41 @@
-- uses: game-ci/unity-builder@v4
-  env:
-    UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-    UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-    UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-  with:
-    targetPlatform: Android
+name: Android Build  
+  
+on:  
+  push:  
+    tags:  
+      - 'v*'  
+  
+jobs:  
+  buildForAndroid:  
+    name: Build for Android  
+    runs-on: ubuntu-latest  
+    steps:  
+      - uses: actions/checkout@v4  
+        with:  
+          fetch-depth: 0  
+          lfs: true  
+  
+      - uses: actions/cache@v3  
+        with:  
+          path: src/Library  
+          key: Library-Android  
+          restore-keys: Library-  
+  
+      - name: Build Android APK  
+        uses: game-ci/unity-builder@v4  
+        env:  
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}  
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}  
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}  
+        with:  
+          projectPath: src  
+          targetPlatform: Android  
+          buildName: BeamNG_RemoteControl  
+          buildsPath: build  
+          androidAppBundle: false  
+  
+      - name: Upload APK  
+        uses: actions/upload-artifact@v3  
+        with:  
+          name: Android-APK  
+          path: build/Android/*.apk
